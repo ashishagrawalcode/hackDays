@@ -1,0 +1,209 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&display=swap');
+
+@import "tailwindcss";
+
+/* ============================================================
+   TAILWIND V4 THEME TOKENS
+   ============================================================ */
+@theme {
+  --color-phosphor: #39FF14;
+  --color-amber: #FFB800;
+  --color-pitred: #FF3B00;
+  --color-drs: #00E5FF;
+  --color-void: #050505;
+  --color-carbon: #111111;
+  --color-surface: #181818;
+  --color-dim: #2a2a2a;
+
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+
+/* ============================================================
+   CSS VARIABLES (For manual CSS animations/shadows)
+   ============================================================ */
+:root {
+  --phosphor:   #39FF14;
+  --amber:      #FFB800;
+  --pitred:     #FF3B00;
+  --drs:        #00E5FF;
+  --void:       #050505;
+  --carbon:     #111111;
+  --surface:    #181818;
+  --dim:        #2a2a2a;
+}
+
+/* ============================================================
+   BASE RESET & BODY
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--void);
+  color: #ededed;
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 400;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: var(--phosphor);
+  color: #000;
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--void); }
+::-webkit-scrollbar-thumb { background: var(--dim); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--phosphor); }
+
+/* ============================================================
+   TAILWIND V4 CUSTOM UTILITIES
+   ============================================================ */
+@utility clip-skew {
+  clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+}
+
+@utility clip-skew-sm {
+  clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+}
+
+@utility text-stroke-phosphor {
+  -webkit-text-stroke: 1.5px var(--phosphor);
+  color: transparent;
+}
+
+@utility text-stroke-white {
+  -webkit-text-stroke: 1px rgba(255,255,255,0.5);
+  color: transparent;
+}
+
+@utility text-stroke-amber {
+  -webkit-text-stroke: 1.5px var(--amber);
+  color: transparent;
+}
+
+@utility glow-phosphor {
+  text-shadow: 0 0 20px rgba(57,255,20,0.6), 0 0 40px rgba(57,255,20,0.3), 0 0 80px rgba(57,255,20,0.1);
+}
+
+@utility glow-amber {
+  text-shadow: 0 0 20px rgba(255,184,0,0.6), 0 0 40px rgba(255,184,0,0.3);
+}
+
+/* ============================================================
+   MANUAL CSS CLASSES
+   ============================================================ */
+.card-glow:hover {
+  box-shadow: 0 0 0 1px rgba(57,255,20,0.2), 0 20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(57,255,20,0.05);
+}
+
+.scanlines::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.12) 2px, rgba(0,0,0,0.12) 4px);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.carbon-texture {
+  background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 8px),
+                    repeating-linear-gradient(-45deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 8px);
+}
+
+.checker-stripe {
+  background-image: repeating-linear-gradient(-45deg, rgba(255,255,255,0.08) 0, rgba(255,255,255,0.08) 5px, transparent 5px, transparent 10px);
+}
+
+.circuit-line {
+  background: linear-gradient(90deg, transparent 0%, var(--phosphor) 20%, var(--phosphor) 80%, transparent 100%);
+  opacity: 0.15;
+}
+
+/* ============================================================
+   LENIS SMOOTH SCROLL
+   ============================================================ */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
+.lenis.lenis-scrolling iframe { pointer-events: none; }
+
+/* ============================================================
+   ANIMATIONS & PRELOADER
+   ============================================================ */
+.preloader__title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(40px, 8vw, 96px);
+  letter-spacing: 0.1em;
+  color: #fff;
+  text-align: center;
+}
+
+.preloader__title span { color: var(--phosphor); }
+.preloader__lights { display: flex; gap: 20px; }
+
+.preloader__light {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--dim);
+  border: 2px solid rgba(255,255,255,0.06);
+  transition: background 0.1s ease, box-shadow 0.1s ease;
+}
+
+.preloader__light.on {
+  background: var(--pitred);
+  box-shadow: 0 0 10px var(--pitred), 0 0 25px rgba(255,59,0,0.6), 0 0 50px rgba(255,59,0,0.3);
+}
+
+.preloader__light.out {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.preloader__bar {
+  width: 200px;
+  height: 1px;
+  background: var(--dim);
+  position: relative;
+  overflow: hidden;
+}
+
+.preloader__bar-fill {
+  position: absolute;
+  top: 0; left: 0; height: 100%;
+  background: var(--phosphor);
+  width: 0%;
+  transition: width 0.05s linear;
+  box-shadow: 0 0 8px var(--phosphor);
+}
+
+/* Custom Cursor */
+body { cursor: none; }
+.custom-cursor { position: fixed; top: 0; left: 0; width: 16px; height: 16px; pointer-events: none; z-index: 99999; mix-blend-mode: difference; }
+.custom-cursor__dot { width: 6px; height: 6px; background: var(--phosphor); border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+.custom-cursor__ring { width: 32px; height: 32px; border: 1px solid rgba(57,255,20,0.5); border-radius: 50%; position: fixed; top: 0; left: 0; pointer-events: none; z-index: 99998; transition: transform 0.12s ease, width 0.2s, height 0.2s, border-color 0.2s; }
+.custom-cursor__ring.hovering { width: 48px; height: 48px; border-color: var(--phosphor); }
+
+/* Noise */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 128px;
+}
