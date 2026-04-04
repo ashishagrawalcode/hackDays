@@ -185,7 +185,6 @@ export function FinishLineFooter() {
         whiteSpace: "nowrap",
         pointerEvents: "none",
         lineHeight: 1,
-        bottom: "-0.08em",
       } as React.CSSProperties}>
         FINISH
       </div>
