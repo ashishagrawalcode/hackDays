@@ -1,100 +1,143 @@
 "use client";
 
-import { useRef } from "react";
-import { useInView } from "react-intersection-observer";
-import { cn } from "@/lib/utils";
+import { useRef, useEffect } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-interface SectionDividerProps {
-  label: string;
-  index: number;
-  className?: string;
-}
+gsap.registerPlugin(ScrollTrigger);
 
-const STRIPE_COLORS = [
-  "#39FF14", // phosphor
-  "#2a2a2a",
-  "#FFB800", // amber
-  "#2a2a2a",
-  "#FF3B00", // pitred
-  "#2a2a2a",
-  "#00E5FF", // drs
-  "#2a2a2a",
+const STRIPE_SCHEME = [
+  "#E8002D", "#0d0d0d", "#fff",    "#0d0d0d",
+  "#E8002D", "#0d0d0d", "#FFF200", "#0d0d0d",
+  "#E8002D", "#0d0d0d", "#fff",    "#0d0d0d",
 ];
 
-export function SectionDivider({ label, index, className }: SectionDividerProps) {
-  const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.3 });
+interface Props {
+  label: string;
+  index: number;
+}
+
+export function SectionDivider({ label, index }: Props) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const stripes = el.querySelectorAll<HTMLElement>(".div-stripe");
+
+    gsap.fromTo(
+      stripes,
+      { scaleX: 0, transformOrigin: "left center" },
+      {
+        scaleX: 1,
+        duration: 0.4,
+        stagger: 0.04,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: el,
+          start: "top 90%",
+          toggleActions: "play none none reverse",
+        },
+      }
+    );
+
+    return () => ScrollTrigger.getAll().forEach(t => t.kill());
+  }, []);
 
   return (
     <div
       ref={ref}
-      className={cn(
-        "relative flex items-center w-full h-12 overflow-hidden",
-        "border-t border-b",
-        "transition-opacity duration-700",
-        inView ? "opacity-100" : "opacity-0",
-        className
-      )}
-      style={{ borderColor: "rgba(255,255,255,0.05)" }}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        height: 44,
+        overflow: "hidden",
+        borderTop: "1px solid rgba(255,255,255,0.04)",
+        borderBottom: "1px solid rgba(255,255,255,0.04)",
+        background: "#030303",
+        position: "relative",
+      }}
     >
       {/* Left stripes */}
-      <div className="flex gap-[3px] flex-shrink-0 pl-4">
-        {STRIPE_COLORS.map((color, i) => (
+      <div style={{ display: "flex", gap: 2, paddingLeft: 20, flexShrink: 0 }}>
+        {STRIPE_SCHEME.map((color, i) => (
           <div
             key={i}
-            className="w-[10px] h-12 -skew-x-12 transition-all duration-500"
+            className="div-stripe"
             style={{
+              width: 14,
+              height: 44,
               background: color,
-              opacity: inView ? 0.6 : 0,
-              transitionDelay: `${i * 40}ms`,
+              transform: "skewX(-12deg)",
+              opacity: color === "#0d0d0d" ? 0.6 : 0.8,
             }}
           />
         ))}
       </div>
 
       {/* Left line */}
-      <div
-        className="flex-1 h-px ml-4 transition-all duration-700"
-        style={{
-          background: "linear-gradient(90deg, rgba(255,255,255,0.08), transparent)",
-          transitionDelay: "200ms",
-        }}
-      />
+      <div style={{
+        flex: 1,
+        height: 1,
+        marginLeft: 16,
+        background: "linear-gradient(90deg, rgba(255,255,255,0.07), transparent)",
+      }} />
 
       {/* Center label */}
-      <div className="flex items-center gap-3 px-6 flex-shrink-0">
-        <span
-          className="font-mono text-[9px] tracking-[0.4em] uppercase"
-          style={{ color: "#333" }}
-        >
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        padding: "0 20px",
+        flexShrink: 0,
+      }}>
+        <span style={{
+          fontFamily: "'IBM Plex Mono',monospace",
+          fontSize: 9,
+          letterSpacing: "0.35em",
+          textTransform: "uppercase",
+          color: "rgba(232,0,45,0.45)",
+        }}>
           {String(index).padStart(2, "0")}
         </span>
-        <span
-          className="font-mono text-[9px] tracking-[0.3em] uppercase"
-          style={{ color: "#444" }}
-        >
+        <span style={{
+          width: 3,
+          height: 3,
+          background: "var(--f1red)",
+          transform: "rotate(45deg)",
+        }} />
+        <span style={{
+          fontFamily: "'IBM Plex Mono',monospace",
+          fontSize: 9,
+          letterSpacing: "0.3em",
+          textTransform: "uppercase",
+          color: "rgba(255,255,255,0.18)",
+        }}>
           {label}
         </span>
       </div>
 
       {/* Right line */}
-      <div
-        className="flex-1 h-px mr-4"
-        style={{
-          background: "linear-gradient(270deg, rgba(255,255,255,0.08), transparent)",
-        }}
-      />
+      <div style={{
+        flex: 1,
+        height: 1,
+        marginRight: 16,
+        background: "linear-gradient(270deg, rgba(255,255,255,0.07), transparent)",
+      }} />
 
-      {/* Right stripes — reversed */}
-      <div className="flex gap-[3px] flex-shrink-0 pr-4">
-        {[...STRIPE_COLORS].reverse().map((color, i) => (
+      {/* Right stripes reversed */}
+      <div style={{ display: "flex", gap: 2, paddingRight: 20, flexShrink: 0 }}>
+        {[...STRIPE_SCHEME].reverse().map((color, i) => (
           <div
             key={i}
-            className="w-[10px] h-12 -skew-x-12"
+            className="div-stripe"
             style={{
+              width: 14,
+              height: 44,
               background: color,
-              opacity: inView ? 0.6 : 0,
-              transition: "opacity 0.5s ease",
-              transitionDelay: `${i * 40 + 100}ms`,
+              transform: "skewX(-12deg)",
+              opacity: color === "#0d0d0d" ? 0.6 : 0.8,
             }}
           />
         ))}

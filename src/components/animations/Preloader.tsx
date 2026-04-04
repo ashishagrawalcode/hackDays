@@ -1,150 +1,243 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import gsap from "gsap";
 
 const LIGHT_COUNT = 5;
-const LIGHT_ON_INTERVAL = 600; // ms
 
 export function Preloader() {
-  const [phase, setPhase] = useState<"idle" | "lighting" | "out" | "done">("idle");
-  const [litCount, setLitCount] = useState(0);
+  const overlayRef   = useRef<HTMLDivElement>(null);
+  const revBarRef    = useRef<HTMLDivElement>(null);
+  const lightsRef    = useRef<(HTMLDivElement | null)[]>([]);
+  const rpmRef       = useRef<HTMLSpanElement>(null);
+  const [done, setDone] = useState(false);
 
-  // 1. The Bulletproof Async Sequence
   useEffect(() => {
-    let isMounted = true; // Protects against React Strict Mode double-mounting
+    if (done) return;
+    const overlay = overlayRef.current;
+    if (!overlay) return;
 
-    const runSequence = async () => {
-      // Initial delay
-      await new Promise((r) => setTimeout(r, 400));
-      if (!isMounted) return;
-      setPhase("lighting");
+    // Prevent scroll during preloader
+    document.body.style.overflow = "hidden";
 
-      // Turn on lights one by one
-      for (let i = 1; i <= LIGHT_COUNT; i++) {
-        await new Promise((r) => setTimeout(r, LIGHT_ON_INTERVAL));
-        if (!isMounted) return;
-        setLitCount(i);
-      }
+    const tl = gsap.timeline({
+      onComplete: () => {
+        document.body.style.overflow = "";
+        setDone(true);
+      },
+    });
 
-      // Hold for a moment, then LIGHTS OUT
-      await new Promise((r) => setTimeout(r, 400));
-      if (!isMounted) return;
-      setPhase("out");
+    // 1. Initial hold
+    tl.to({}, { duration: 0.4 });
 
-      // Hold in the dark for a split second, then dismiss
-      await new Promise((r) => setTimeout(r, 300));
-      if (!isMounted) return;
-      setPhase("done");
-    };
+    // 2. Rev bar climbs to 80%
+    tl.to(revBarRef.current, {
+      width: "80%",
+      duration: 1.0,
+      ease: "power3.out",
+    });
 
-    runSequence();
+    // 3. Light 1 on
+    tl.to(lightsRef.current[0], {
+      backgroundColor: "#FF1801",
+      boxShadow: "0 0 8px #FF1801, 0 0 24px rgba(255,24,1,0.7), 0 0 60px rgba(255,24,1,0.35), inset 0 0 12px rgba(255,100,50,0.5)",
+      duration: 0.12,
+    }, "+=0.1");
 
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+    // 4. Lights 2-5 in sequence
+    for (let i = 1; i < LIGHT_COUNT; i++) {
+      tl.to(lightsRef.current[i], {
+        backgroundColor: "#FF1801",
+        boxShadow: "0 0 8px #FF1801, 0 0 24px rgba(255,24,1,0.7), 0 0 60px rgba(255,24,1,0.35), inset 0 0 12px rgba(255,100,50,0.5)",
+        duration: 0.12,
+      }, `+=0.52`);
+    }
+
+    // 5. Rev bar slams to 100%
+    tl.to(revBarRef.current, {
+      width: "100%",
+      duration: 0.18,
+      ease: "power4.in",
+    }, "+=0.25");
+
+    // 6. RPM counter flashes
+    tl.to(rpmRef.current, {
+      innerHTML: "18,000",
+      duration: 0,
+    });
+
+    // 7. All lights extinguish instantly — GO
+    tl.to(lightsRef.current, {
+      backgroundColor: "transparent",
+      boxShadow: "none",
+      border: "1px solid transparent",
+      opacity: 0,
+      duration: 0.08,
+      stagger: 0.04,
+    }, "+=0.15");
+
+    // 8. Rev bar drain
+    tl.to(revBarRef.current, {
+      opacity: 0,
+      duration: 0.3,
+    }, "-=0.1");
+
+    // 9. Overlay slides UP off screen — race start gate lifting
+    tl.to(overlay, {
+      yPercent: -100,
+      duration: 0.85,
+      ease: "power4.inOut",
+    }, "+=0.05");
+
+    return () => { tl.kill(); };
+  }, [done]);
+
+  if (done) return null;
 
   return (
-    // AnimatePresence automatically handles the deletion of the component
-    // We removed the 'if (!visible) return null;' so this actually works!
-    <AnimatePresence>
-      {phase !== "done" && (
-        <motion.div
-          key="preloader"
-          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#050505] overflow-hidden"
-          exit={{ opacity: 0, pointerEvents: "none" }}
-          transition={{ duration: 0.6, ease: "easeInOut" }}
-        >
-          {/* Subtle grid background */}
+    <div
+      ref={overlayRef}
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 99999,
+        background: "var(--void, #030303)",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        overflow: "hidden",
+      }}
+    >
+      {/* Scanlines */}
+      <div style={{
+        position: "absolute", inset: 0, pointerEvents: "none",
+        background: "repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.1) 3px, rgba(0,0,0,0.1) 4px)",
+      }} />
+
+      {/* F1 track-style corner marks */}
+      {[
+        { top: 24, left: 24 },
+        { top: 24, right: 24 },
+        { bottom: 24, left: 24 },
+        { bottom: 24, right: 24 },
+      ].map((pos, i) => (
+        <div key={i} style={{
+          position: "absolute",
+          width: 20, height: 20,
+          borderTop: i < 2 ? "1px solid rgba(232,0,45,0.3)" : undefined,
+          borderBottom: i >= 2 ? "1px solid rgba(232,0,45,0.3)" : undefined,
+          borderLeft: i % 2 === 0 ? "1px solid rgba(232,0,45,0.3)" : undefined,
+          borderRight: i % 2 !== 0 ? "1px solid rgba(232,0,45,0.3)" : undefined,
+          ...pos,
+        }} />
+      ))}
+
+      {/* Event label */}
+      <p style={{
+        fontFamily: "'IBM Plex Mono', monospace",
+        fontSize: 9,
+        letterSpacing: "0.5em",
+        textTransform: "uppercase",
+        color: "rgba(232,0,45,0.5)",
+        marginBottom: 48,
+      }}>
+        ACM Student Chapter · HackDays 2026
+      </p>
+
+      {/* Light gantry */}
+      <div style={{
+        display: "flex",
+        gap: 16,
+        marginBottom: 52,
+        padding: "24px 40px",
+        background: "rgba(15,15,15,0.9)",
+        border: "1px solid rgba(255,255,255,0.05)",
+        position: "relative",
+      }}>
+        {/* Gantry top bar */}
+        <div style={{
+          position: "absolute", top: 0, left: "10%", right: "10%", height: 2,
+          background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent)",
+        }} />
+
+        {Array.from({ length: LIGHT_COUNT }).map((_, i) => (
           <div
-            className="absolute inset-0 pointer-events-none"
+            key={i}
+            ref={(el) => { lightsRef.current[i] = el; }}
             style={{
-              backgroundImage:
-                "linear-gradient(rgba(57,255,20,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(57,255,20,0.03) 1px,transparent 1px)",
-              backgroundSize: "80px 80px",
+              width: 36,
+              height: 36,
+              borderRadius: "50%",
+              background: "#0d0202",
+              border: "1.5px solid #1a0808",
+              transition: "none",
             }}
           />
+        ))}
+      </div>
 
-          {/* Logo / Title */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-center"
-          >
-            <p
-              className="font-mono text-[9px] tracking-[0.5em] uppercase mb-3"
-              style={{ color: "var(--phosphor)", opacity: 0.6 }}
-            >
-              ACM Student Chapter
-            </p>
-            <h1 className="preloader__title">
-              HACK<span>DAYS</span>
-              <br />
-              <span
-                className="font-mono font-bold"
-                style={{ fontSize: "0.28em", letterSpacing: "0.4em", color: "#444", verticalAlign: "middle" }}
-              >
-                2026
-              </span>
-            </h1>
-          </motion.div>
+      {/* RPM rev bar */}
+      <div style={{
+        width: 280,
+        marginBottom: 20,
+        position: "relative",
+      }}>
+        <div style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginBottom: 6,
+          fontFamily: "'IBM Plex Mono', monospace",
+          fontSize: 9,
+          letterSpacing: "0.3em",
+          textTransform: "uppercase",
+        }}>
+          <span style={{ color: "rgba(255,255,255,0.2)" }}>ENGINE RPM</span>
+          <span ref={rpmRef} style={{ color: "rgba(232,0,45,0.7)" }}>0</span>
+        </div>
+        <div style={{
+          width: "100%",
+          height: 3,
+          background: "#1a1a1a",
+          overflow: "hidden",
+        }}>
+          <div
+            ref={revBarRef}
+            style={{
+              width: "0%",
+              height: "100%",
+              background: "linear-gradient(90deg, #E8002D, #FF6600, #FFF200)",
+              boxShadow: "0 0 10px rgba(232,0,45,0.8)",
+            }}
+          />
+        </div>
+        {/* RPM scale markers */}
+        <div style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginTop: 4,
+          fontFamily: "'IBM Plex Mono', monospace",
+          fontSize: 7,
+          color: "rgba(255,255,255,0.1)",
+          letterSpacing: "0.15em",
+        }}>
+          {["0", "3K", "6K", "9K", "12K", "15K", "18K"].map(v => (
+            <span key={v}>{v}</span>
+          ))}
+        </div>
+      </div>
 
-          {/* 5 Start Lights */}
-          <div className="flex flex-col items-center gap-6 mt-8">
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.4 }}
-              transition={{ delay: 0.3 }}
-              className="font-mono text-[9px] tracking-[0.35em] uppercase"
-              style={{ color: "#555" }}
-            >
-              Preparing Grid
-            </motion.p>
-
-            <div className="preloader__lights">
-              {Array.from({ length: LIGHT_COUNT }).map((_, i) => {
-                const isLit = litCount > i;
-                const isOut = phase === "out";
-                return (
-                  <motion.div
-                    key={i}
-                    className={`preloader__light ${isLit && !isOut ? "on" : ""} ${isOut ? "out" : ""}`}
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ delay: i * 0.08, duration: 0.3 }}
-                  />
-                );
-              })}
-            </div>
-
-            {/* Framer Motion Progress bar — Replaces the manual tick logic! */}
-            <div className="preloader__bar">
-              <motion.div
-                className="preloader__bar-fill"
-                initial={{ width: "0%" }}
-                animate={{ width: phase === "lighting" || phase === "out" ? "100%" : "0%" }}
-                transition={{ duration: (LIGHT_COUNT * LIGHT_ON_INTERVAL) / 1000, ease: "linear" }}
-              />
-            </div>
-
-            <motion.p
-              animate={{ opacity: phase === "out" ? 1 : 0 }}
-              className="font-mono text-[8px] tracking-[0.4em] uppercase"
-              style={{ color: "var(--phosphor)" }}
-            >
-              Lights Out — GO!
-            </motion.p>
-          </div>
-
-          {/* Corner decoration */}
-          <div className="absolute top-4 left-4 w-8 h-8 border-t border-l" style={{ borderColor: "rgba(57,255,20,0.15)" }} />
-          <div className="absolute top-4 right-4 w-8 h-8 border-t border-r" style={{ borderColor: "rgba(57,255,20,0.15)" }} />
-          <div className="absolute bottom-4 left-4 w-8 h-8 border-b border-l" style={{ borderColor: "rgba(57,255,20,0.15)" }} />
-          <div className="absolute bottom-4 right-4 w-8 h-8 border-b border-r" style={{ borderColor: "rgba(57,255,20,0.15)" }} />
-        </motion.div>
-      )}
-    </AnimatePresence>
+      {/* Bottom status */}
+      <p style={{
+        fontFamily: "'IBM Plex Mono', monospace",
+        fontSize: 9,
+        letterSpacing: "0.4em",
+        textTransform: "uppercase",
+        color: "rgba(255,255,255,0.12)",
+        marginTop: 16,
+      }}>
+        Preparing Grid
+      </p>
+    </div>
   );
 }

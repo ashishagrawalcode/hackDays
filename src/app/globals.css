@@ -1,131 +1,292 @@
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap');
 
 @import "tailwindcss";
 
 /* ============================================================
-   TAILWIND V4 THEME TOKENS
+   TAILWIND V4 DESIGN TOKENS
    ============================================================ */
 @theme {
-  --color-phosphor: #39FF14;
-  --color-amber: #FFB800;
-  --color-pitred: #FF3B00;
-  --color-drs: #00E5FF;
-  --color-void: #050505;
-  --color-carbon: #111111;
-  --color-surface: #181818;
-  --color-dim: #2a2a2a;
+  /* F1 RED is now the HERO — not green */
+  --color-f1red:    #E8002D;
+  --color-f1red2:   #FF1801;
+  --color-amber:    #FFF200;
+  --color-drs:      #00D2FF;
+  --color-white:    #F0EDE8;
+  --color-void:     #030303;
+  --color-carbon:   #0D0D0D;
+  --color-surface:  #141414;
+  --color-dim:      #222222;
+  --color-muted:    #3a3a3a;
+  --color-ghost:    #555555;
 
   --font-display: 'Bebas Neue', sans-serif;
-  --font-mono: 'IBM Plex Mono', monospace;
+  --font-mono:    'IBM Plex Mono', monospace;
 }
 
 /* ============================================================
-   CSS VARIABLES (For manual CSS animations/shadows)
+   DESIGN TOKENS — CSS VARIABLES
    ============================================================ */
 :root {
-  --phosphor:   #39FF14;
-  --amber:      #FFB800;
-  --pitred:     #FF3B00;
-  --drs:        #00E5FF;
-  --void:       #050505;
-  --carbon:     #111111;
-  --surface:    #181818;
-  --dim:        #2a2a2a;
+  --f1red:   #E8002D;
+  --f1red2:  #FF1801;
+  --amber:   #FFF200;
+  --drs:     #00D2FF;
+  --white:   #F0EDE8;
+  --void:    #030303;
+  --carbon:  #0D0D0D;
+  --surface: #141414;
+  --dim:     #222222;
+  --muted:   #3a3a3a;
+  --ghost:   #555555;
+
+  /* Glow radii */
+  --glow-red:   0 0 20px rgba(232,0,45,0.6), 0 0 60px rgba(232,0,45,0.25);
+  --glow-amber: 0 0 20px rgba(255,242,0,0.5), 0 0 50px rgba(255,242,0,0.15);
+  --glow-drs:   0 0 20px rgba(0,210,255,0.5), 0 0 50px rgba(0,210,255,0.15);
 }
 
 /* ============================================================
-   BASE RESET & BODY
+   RESET
    ============================================================ */
-*, *::before, *::after {
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
 body {
-  background-color: var(--void);
-  color: #ededed;
+  background: var(--void);
+  color: var(--white);
   font-family: 'IBM Plex Mono', monospace;
-  font-weight: 400;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
+::selection { background: var(--f1red); color: #fff; }
 
-::selection {
-  background: var(--phosphor);
-  color: #000;
-}
-
-::-webkit-scrollbar { width: 4px; }
+/* Scrollbar */
+::-webkit-scrollbar { width: 3px; }
 ::-webkit-scrollbar-track { background: var(--void); }
-::-webkit-scrollbar-thumb { background: var(--dim); border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: var(--phosphor); }
+::-webkit-scrollbar-thumb { background: var(--f1red); }
 
 /* ============================================================
-   TAILWIND V4 CUSTOM UTILITIES
+   TAILWIND V4 UTILITIES
    ============================================================ */
-@utility clip-skew {
-  clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+@utility clip-slash {
+  clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
 }
-
-@utility clip-skew-sm {
-  clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+@utility clip-slash-sm {
+  clip-path: polygon(7px 0%, 100% 0%, calc(100% - 7px) 100%, 0% 100%);
 }
-
-@utility text-stroke-phosphor {
-  -webkit-text-stroke: 1.5px var(--phosphor);
+@utility clip-corner {
+  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+}
+@utility text-stroke-red {
+  -webkit-text-stroke: 2px var(--f1red);
   color: transparent;
 }
-
 @utility text-stroke-white {
-  -webkit-text-stroke: 1px rgba(255,255,255,0.5);
+  -webkit-text-stroke: 1.5px rgba(240,237,232,0.6);
   color: transparent;
 }
-
 @utility text-stroke-amber {
-  -webkit-text-stroke: 1.5px var(--amber);
+  -webkit-text-stroke: 2px var(--amber);
   color: transparent;
-}
-
-@utility glow-phosphor {
-  text-shadow: 0 0 20px rgba(57,255,20,0.6), 0 0 40px rgba(57,255,20,0.3), 0 0 80px rgba(57,255,20,0.1);
-}
-
-@utility glow-amber {
-  text-shadow: 0 0 20px rgba(255,184,0,0.6), 0 0 40px rgba(255,184,0,0.3);
 }
 
 /* ============================================================
-   MANUAL CSS CLASSES
+   CURSOR — Magnetic crosshair
    ============================================================ */
-.card-glow:hover {
-  box-shadow: 0 0 0 1px rgba(57,255,20,0.2), 0 20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(57,255,20,0.05);
+body { cursor: none; }
+
+#cursor-dot {
+  position: fixed;
+  top: 0; left: 0;
+  width: 5px; height: 5px;
+  background: var(--f1red);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99999;
+  transform: translate(-50%, -50%);
+  will-change: transform;
 }
 
-.scanlines::after {
+#cursor-ring {
+  position: fixed;
+  top: 0; left: 0;
+  width: 36px; height: 36px;
+  border: 1px solid rgba(232,0,45,0.6);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99998;
+  transform: translate(-50%, -50%);
+  will-change: transform;
+  transition: width 0.2s, height 0.2s, border-color 0.2s, opacity 0.2s;
+}
+
+#cursor-ring.is-hovering {
+  width: 56px;
+  height: 56px;
+  border-color: var(--f1red);
+  background: rgba(232,0,45,0.05);
+}
+
+#cursor-ring.is-clicking {
+  width: 28px;
+  height: 28px;
+  border-color: var(--amber);
+  background: rgba(255,242,0,0.08);
+}
+
+/* ============================================================
+   PRELOADER — cinematic F1 race start
+   ============================================================ */
+#preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: var(--void);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Scan lines */
+#preloader::after {
   content: '';
   position: absolute;
   inset: 0;
-  background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.12) 2px, rgba(0,0,0,0.12) 4px);
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0,0,0,0.08) 3px,
+    rgba(0,0,0,0.08) 4px
+  );
   pointer-events: none;
-  z-index: 10;
 }
 
-.carbon-texture {
-  background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 8px),
-                    repeating-linear-gradient(-45deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 8px);
+.start-light {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #1a0a0a;
+  border: 1.5px solid #2a1010;
+  position: relative;
+  transition: none;
 }
 
-.checker-stripe {
-  background-image: repeating-linear-gradient(-45deg, rgba(255,255,255,0.08) 0, rgba(255,255,255,0.08) 5px, transparent 5px, transparent 10px);
+.start-light.lit {
+  background: var(--f1red2);
+  border-color: var(--f1red2);
+  box-shadow:
+    0 0 8px var(--f1red2),
+    0 0 20px rgba(255,24,1,0.7),
+    0 0 50px rgba(255,24,1,0.4),
+    inset 0 0 10px rgba(255,100,50,0.5);
 }
 
-.circuit-line {
-  background: linear-gradient(90deg, transparent 0%, var(--phosphor) 20%, var(--phosphor) 80%, transparent 100%);
-  opacity: 0.15;
+.start-light.extinguished {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  opacity: 0;
+}
+
+/* ============================================================
+   NOISE OVERLAY
+   ============================================================ */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9997;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 160px;
+}
+
+/* ============================================================
+   SECTION DIVIDERS
+   ============================================================ */
+.divider-track {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  height: 40px;
+  overflow: hidden;
+  position: relative;
+}
+
+.divider-stripe {
+  width: 18px;
+  height: 40px;
+  transform: skewX(-14deg);
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   GSAP TIMELINE TRACK
+   ============================================================ */
+.track-container {
+  position: relative;
+}
+
+/* The SVG circuit road */
+.track-svg-path {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 28;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.track-svg-path-center {
+  fill: none;
+  stroke: var(--dim);
+  stroke-width: 22;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.track-progress-path {
+  fill: none;
+  stroke: var(--f1red);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 2000;
+  stroke-dashoffset: 2000;
+}
+
+/* Timeline event card — triggered by GSAP */
+.timeline-card {
+  opacity: 0;
+  transform: translateY(20px);
+  will-change: opacity, transform;
+}
+
+/* Car on track */
+.track-car {
+  will-change: transform;
+  filter: drop-shadow(0 0 8px var(--f1red)) drop-shadow(0 0 20px rgba(232,0,45,0.5));
+}
+
+/* ============================================================
+   CARD HOVER EFFECTS
+   ============================================================ */
+.sponsor-card {
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+.sponsor-card:hover {
+  border-color: rgba(232,0,45,0.35) !important;
+  box-shadow: 0 0 0 1px rgba(232,0,45,0.1), 0 20px 60px rgba(0,0,0,0.7), inset 0 0 40px rgba(232,0,45,0.03);
+  transform: translateY(-2px);
+}
+
+.team-card-inner {
+  transition: transform 0.65s cubic-bezier(0.23, 1, 0.32, 1);
+  transform-style: preserve-3d;
+}
+.team-card:hover .team-card-inner {
+  transform: rotateY(180deg);
 }
 
 /* ============================================================
@@ -133,77 +294,106 @@ body {
    ============================================================ */
 html.lenis, html.lenis body { height: auto; }
 .lenis.lenis-smooth { scroll-behavior: auto !important; }
-.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
 .lenis.lenis-stopped { overflow: hidden; }
 .lenis.lenis-scrolling iframe { pointer-events: none; }
 
 /* ============================================================
-   ANIMATIONS & PRELOADER
+   KEYFRAMES
    ============================================================ */
-.preloader__title {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(40px, 8vw, 96px);
-  letter-spacing: 0.1em;
-  color: #fff;
-  text-align: center;
+@keyframes f1-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.15; }
 }
 
-.preloader__title span { color: var(--phosphor); }
-.preloader__lights { display: flex; gap: 20px; }
-
-.preloader__light {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: var(--dim);
-  border: 2px solid rgba(255,255,255,0.06);
-  transition: background 0.1s ease, box-shadow 0.1s ease;
+@keyframes marquee-left {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
 }
 
-.preloader__light.on {
-  background: var(--pitred);
-  box-shadow: 0 0 10px var(--pitred), 0 0 25px rgba(255,59,0,0.6), 0 0 50px rgba(255,59,0,0.3);
+@keyframes scan-down {
+  0%   { top: -2%; opacity: 1; }
+  90%  { opacity: 1; }
+  100% { top: 102%; opacity: 0; }
 }
 
-.preloader__light.out {
-  background: transparent;
-  border-color: transparent;
-  box-shadow: none;
+@keyframes flicker {
+  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
+  20%, 22%, 24%, 55% { opacity: 0.35; }
 }
 
-.preloader__bar {
-  width: 200px;
-  height: 1px;
-  background: var(--dim);
-  position: relative;
-  overflow: hidden;
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(32px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-.preloader__bar-fill {
-  position: absolute;
-  top: 0; left: 0; height: 100%;
-  background: var(--phosphor);
-  width: 0%;
-  transition: width 0.05s linear;
-  box-shadow: 0 0 8px var(--phosphor);
+@keyframes glitch-x {
+  0%, 100% { clip-path: inset(0 0 95% 0); transform: translateX(-4px); }
+  25%       { clip-path: inset(20% 0 60% 0); transform: translateX(4px); }
+  50%       { clip-path: inset(50% 0 30% 0); transform: translateX(-3px); }
+  75%       { clip-path: inset(75% 0 5% 0); transform: translateX(3px); }
 }
 
-/* Custom Cursor */
-body { cursor: none; }
-.custom-cursor { position: fixed; top: 0; left: 0; width: 16px; height: 16px; pointer-events: none; z-index: 99999; mix-blend-mode: difference; }
-.custom-cursor__dot { width: 6px; height: 6px; background: var(--phosphor); border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
-.custom-cursor__ring { width: 32px; height: 32px; border: 1px solid rgba(57,255,20,0.5); border-radius: 50%; position: fixed; top: 0; left: 0; pointer-events: none; z-index: 99998; transition: transform 0.12s ease, width 0.2s, height 0.2s, border-color 0.2s; }
-.custom-cursor__ring.hovering { width: 48px; height: 48px; border-color: var(--phosphor); }
+@keyframes rev-line {
+  from { width: 0; }
+  to   { width: 100%; }
+}
 
-/* Noise */
-body::before {
+@keyframes border-spin {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ============================================================
+   SECTION TITLE PATTERN
+   ============================================================ */
+.section-eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--f1red);
+  opacity: 0.8;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.section-eyebrow::before {
   content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 9998;
-  pointer-events: none;
-  opacity: 0.025;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-  background-repeat: repeat;
-  background-size: 128px;
+  display: block;
+  width: 20px;
+  height: 1px;
+  background: var(--f1red);
+  opacity: 0.6;
+}
+
+.section-title {
+  font-family: 'Bebas Neue', sans-serif;
+  color: var(--white);
+  letter-spacing: 0.05em;
+  line-height: 0.95;
+}
+
+/* ============================================================
+   FOOTER MARQUEE
+   ============================================================ */
+.footer-marquee {
+  white-space: nowrap;
+  display: flex;
+  animation: marquee-left 25s linear infinite;
+}
+
+/* ============================================================
+   CHECKERBOARD PATTERN (footer / dividers)
+   ============================================================ */
+.checker-bg {
+  background-image:
+    repeating-conic-gradient(rgba(255,255,255,0.04) 0% 25%, transparent 0% 50%);
+  background-size: 12px 12px;
+}
+
+@media (max-width: 768px) {
+  .timeline-mobile { display: flex !important; }
+  /* Hide the 3-column desktop grid on mobile */
 }

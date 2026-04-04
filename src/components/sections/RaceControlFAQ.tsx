@@ -2,147 +2,122 @@
 
 import { useState, useRef } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
-import { SectionTitle } from "@/components/ui/SectionTitle";
-import { SITE_DATA } from "@/lib/constants";
+import { FAQ } from "@/lib/constants";
 
-/* ─────────────────────────────────────────────
-   FAQ DATA
-───────────────────────────────────────────── */
-const FAQ_ITEMS = (SITE_DATA as any).faq ?? [
-  {
-    id: "01",
-    question: "Participant Eligibility",
-    answer:
-      "Open to tech professionals and all students. Multidisciplinary teams are encouraged. Each team must have a minimum of 2 and maximum of 4 members. Solo participants will be assisted in team formation at the venue.",
-  },
-  {
-    id: "02",
-    question: "Registration Process",
-    answer:
-      "Online registration through Unstop. Individual and team submissions accepted. Register your team lead first, then invite team members via the portal. Confirmation email arrives within 24 hours of submission.",
-  },
-  {
-    id: "03",
-    question: "Awards & Recognition",
-    answer:
-      "Comprehensive prize structure including cash awards and other opportunities. Top three teams receive ₹30,000, ₹20,000, and ₹10,000 respectively. Special tracks for best UI/UX, best use of sponsor API, and most innovative concept carry additional prizes.",
-  },
-  {
-    id: "04",
-    question: "Evaluation Methodology",
-    answer:
-      "All evaluation modes will be offline with live demos to the jury. Teams are scored on technical complexity, innovation, real-world viability, and presentation quality. Each category is weighted equally.",
-  },
-  {
-    id: "05",
-    question: "Hardware & Infrastructure",
-    answer:
-      "High-speed Wi-Fi provided throughout the venue. Power strips at every station. Teams may bring their own hardware. Cloud credits from sponsors are available on request through the resource portal.",
-  },
-  {
-    id: "06",
-    question: "Food & Accommodation",
-    answer:
-      "Meals, snacks, and beverages are provided for the full 24-hour duration. Accommodation is not provided — teams are responsible for their own travel and stay. We recommend nearby hostels listed in the participant handbook.",
-  },
-];
-
-/* ─────────────────────────────────────────────
-   TERMINAL PROMPT ANIMATION
-───────────────────────────────────────────── */
-function TerminalPrompt({ active }: { active: boolean }) {
+/* ─────────────────────────────────────────────────────────────
+   TERMINAL CURSOR
+───────────────────────────────────────────────────────────── */
+function Cursor({ active }: { active: boolean }) {
   return (
-    <span className="inline-flex items-center gap-1 font-mono">
-      <span style={{ color: "#39FF14" }}>race-control</span>
-      <span className="text-white/30">@</span>
-      <span style={{ color: "#FFB800" }}>faq</span>
-      <span className="text-white/30">:~$</span>
-      <motion.span
-        className="inline-block w-[6px] h-[14px] ml-1 align-middle"
-        style={{ background: active ? "#39FF14" : "transparent" }}
-        animate={active ? { opacity: [1, 0, 1] } : { opacity: 0 }}
-        transition={{ duration: 0.8, repeat: Infinity }}
-      />
-    </span>
+    <motion.span
+      style={{
+        display: "inline-block",
+        width: 7, height: 14,
+        background: active ? "#E8002D" : "transparent",
+        marginLeft: 4,
+        verticalAlign: "middle",
+      }}
+      animate={active ? { opacity: [1, 0, 1] } : { opacity: 0 }}
+      transition={{ duration: 0.75, repeat: Infinity }}
+    />
   );
 }
 
-/* ─────────────────────────────────────────────
+/* ─────────────────────────────────────────────────────────────
    ACCORDION ITEM
-───────────────────────────────────────────── */
-interface FAQItem {
-  id: string;
-  question: string;
-  answer: string;
-}
-
-function AccordionItem({
-  item,
-  isOpen,
-  onToggle,
-  index,
+───────────────────────────────────────────────────────────── */
+function Item({
+  item, isOpen, onToggle, index,
 }: {
-  item: FAQItem;
+  item: typeof FAQ.items[0];
   isOpen: boolean;
   onToggle: () => void;
   index: number;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-40px" });
+  const inView = useInView(ref, { once: true, margin: "-40px" });
 
   return (
     <motion.div
       ref={ref}
-      className="border-b border-white/8 last:border-b-0"
-      initial={{ opacity: 0, x: -20 }}
-      animate={isInView ? { opacity: 1, x: 0 } : {}}
-      transition={{ delay: index * 0.06, duration: 0.4 }}
+      style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", position: "relative" }}
+      initial={{ opacity: 0, x: -16 }}
+      animate={inView ? { opacity: 1, x: 0 } : {}}
+      transition={{ delay: index * 0.07, duration: 0.4 }}
     >
-      {/* Question row */}
+      {/* Active left bar */}
+      {isOpen && (
+        <motion.div
+          layoutId="faq-bar"
+          style={{
+            position: "absolute", left: 0, top: 0, bottom: 0, width: 3,
+            background: "#E8002D",
+            boxShadow: "0 0 10px rgba(232,0,45,0.6)",
+          }}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        />
+      )}
+
+      {/* Question button */}
       <button
         onClick={onToggle}
-        className="w-full flex items-center justify-between gap-4 py-5 px-6 text-left group transition-colors duration-200"
         style={{
-          background: isOpen ? "rgba(57,255,20,0.04)" : "transparent",
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 16,
+          padding: "18px 20px 18px 24px",
+          background: isOpen ? "rgba(232,0,45,0.03)" : "transparent",
+          border: "none",
+          cursor: "none",
+          textAlign: "left",
+          transition: "background 0.2s",
         }}
       >
-        {/* Left — ID + question */}
-        <div className="flex items-center gap-4 min-w-0">
-          <span
-            className="font-mono text-[10px] tracking-widest flex-shrink-0 w-8"
-            style={{ color: isOpen ? "#39FF14" : "rgba(255,255,255,0.25)" }}
-          >
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <span style={{
+            fontFamily: "'IBM Plex Mono', monospace",
+            fontSize: 10,
+            color: isOpen ? "#E8002D" : "rgba(255,255,255,0.2)",
+            letterSpacing: "0.2em",
+            flexShrink: 0,
+          }}>
             {item.id}
           </span>
-
-          {/* Vertical separator */}
-          <div
-            className="w-px h-5 flex-shrink-0"
-            style={{ background: isOpen ? "#39FF14" : "rgba(255,255,255,0.12)" }}
-          />
-
-          <span
-            className="font-display text-lg tracking-wide uppercase transition-colors duration-200"
-            style={{ color: isOpen ? "#ffffff" : "rgba(255,255,255,0.7)" }}
-          >
+          <div style={{
+            width: 1, height: 18, flexShrink: 0,
+            background: isOpen ? "#E8002D" : "rgba(255,255,255,0.1)",
+          }} />
+          <span style={{
+            fontFamily: "'Bebas Neue', sans-serif",
+            fontSize: 22,
+            letterSpacing: "0.07em",
+            textTransform: "uppercase",
+            color: isOpen ? "#F0EDE8" : "rgba(240,237,232,0.6)",
+            transition: "color 0.2s",
+          }}>
             {item.question}
           </span>
         </div>
 
-        {/* Right — toggle icon */}
+        {/* Toggle icon */}
         <motion.div
-          className="flex-shrink-0 w-8 h-8 border flex items-center justify-center transition-colors duration-200"
-          style={{
-            borderColor: isOpen ? "#39FF14" : "rgba(255,255,255,0.15)",
-            background: isOpen ? "rgba(57,255,20,0.1)" : "transparent",
-            clipPath: "polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%)",
-          }}
           animate={{ rotate: isOpen ? 45 : 0 }}
-          transition={{ duration: 0.25 }}
+          transition={{ duration: 0.22 }}
+          style={{
+            flexShrink: 0,
+            width: 28, height: 28,
+            border: `1px solid ${isOpen ? "#E8002D" : "rgba(255,255,255,0.12)"}`,
+            background: isOpen ? "rgba(232,0,45,0.1)" : "transparent",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            clipPath: "polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)",
+            transition: "border-color 0.2s, background 0.2s",
+          }}
         >
           <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-            <line x1="5" y1="0" x2="5" y2="10" stroke={isOpen ? "#39FF14" : "white"} strokeWidth="1.5" />
-            <line x1="0" y1="5" x2="10" y2="5" stroke={isOpen ? "#39FF14" : "white"} strokeWidth="1.5" />
+            <line x1="5" y1="0" x2="5" y2="10" stroke={isOpen ? "#E8002D" : "white"} strokeWidth="1.5" />
+            <line x1="0" y1="5" x2="10" y2="5" stroke={isOpen ? "#E8002D" : "white"} strokeWidth="1.5" />
           </svg>
         </motion.div>
       </button>
@@ -154,188 +129,206 @@ function AccordionItem({
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
-            className="overflow-hidden"
+            transition={{ duration: 0.32, ease: [0.4, 0, 0.2, 1] }}
+            style={{ overflow: "hidden" }}
           >
-            <div className="pb-5 px-6">
-              {/* Terminal-style answer block */}
-              <div
-                className="border border-white/8 p-4 font-mono"
-                style={{
-                  background: "#0a0a0a",
-                  clipPath: "polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%)",
-                }}
-              >
+            <div style={{ padding: "0 20px 20px 24px" }}>
+              <div style={{
+                background: "#080808",
+                border: "1px solid rgba(255,255,255,0.06)",
+                padding: "16px 18px",
+                clipPath: "polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%)",
+              }}>
                 {/* Terminal header */}
-                <div className="flex items-center gap-2 mb-3 pb-3 border-b border-white/8">
-                  <TerminalPrompt active={isOpen} />
-                  <span className="font-mono text-xs text-white/30 ml-1">query --id={item.id}</span>
+                <div style={{
+                  display: "flex", alignItems: "center", gap: 6,
+                  paddingBottom: 10, marginBottom: 10,
+                  borderBottom: "1px solid rgba(255,255,255,0.05)",
+                }}>
+                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "#E8002D" }}>race-control</span>
+                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "rgba(255,255,255,0.2)" }}>@faq:~$</span>
+                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "rgba(255,255,255,0.2)" }}>query --id={item.id}</span>
+                  <Cursor active={true} />
                 </div>
-
-                {/* Answer */}
-                <motion.p
-                  className="font-mono text-[12px] text-white/60 leading-relaxed"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.15 }}
-                >
-                  <span className="text-white/25 mr-2">&gt;</span>
+                <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: "rgba(240,237,232,0.55)", lineHeight: 1.75 }}>
+                  <span style={{ color: "rgba(255,255,255,0.2)", marginRight: 8 }}>&gt;</span>
                   {item.answer}
-                </motion.p>
-
-                {/* Status line */}
-                <div className="mt-3 pt-3 border-t border-white/8 flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-                  <span className="font-mono text-[9px] text-white/20 tracking-widest">STATUS: RESOLVED</span>
+                </p>
+                <div style={{
+                  marginTop: 12, paddingTop: 10,
+                  borderTop: "1px solid rgba(255,255,255,0.05)",
+                  display: "flex", alignItems: "center", gap: 6,
+                }}>
+                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#22c55e" }} />
+                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, color: "rgba(255,255,255,0.15)", letterSpacing: "0.25em", textTransform: "uppercase" }}>
+                    STATUS: RESOLVED
+                  </span>
                 </div>
               </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Left accent line when open */}
-      {isOpen && (
-        <motion.div
-          className="absolute left-0 top-0 bottom-0 w-[3px]"
-          style={{ background: "#39FF14" }}
-          initial={{ scaleY: 0 }}
-          animate={{ scaleY: 1 }}
-          transition={{ duration: 0.3 }}
-        />
-      )}
     </motion.div>
   );
 }
 
-/* ─────────────────────────────────────────────
+/* ─────────────────────────────────────────────────────────────
    SECTION EXPORT
-───────────────────────────────────────────── */
+───────────────────────────────────────────────────────────── */
 export function RaceControlFAQ() {
-  const [openId, setOpenId] = useState<string | null>("01");
-
-  const toggle = (id: string) => {
-    setOpenId((prev) => (prev === id ? null : id));
-  };
+  const [openId, setOpenId] = useState<string>("01");
 
   return (
     <section
       id="faq"
-      className="relative py-32 overflow-hidden"
-      style={{ background: "linear-gradient(180deg, #0a0a0a 0%, #050505 100%)" }}
+      style={{
+        position: "relative",
+        padding: "100px 0",
+        background: "linear-gradient(180deg, #070707 0%, #030303 100%)",
+        overflow: "hidden",
+      }}
     >
-      {/* CRT scanline texture */}
-      <div
-        className="absolute inset-0 pointer-events-none opacity-[0.025]"
-        style={{
-          backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(57,255,20,0.5) 2px, rgba(57,255,20,0.5) 3px)",
-          backgroundSize: "100% 4px",
-        }}
-      />
+      {/* CRT scanlines */}
+      <div style={{
+        position: "absolute", inset: 0, pointerEvents: "none", opacity: 0.02,
+        backgroundImage: "repeating-linear-gradient(0deg, rgba(232,0,45,0.5) 0px, transparent 1px, transparent 3px)",
+        backgroundSize: "100% 4px",
+      }} />
 
-      {/* Side decoration — vertical text */}
-      <div className="absolute left-6 top-1/2 -translate-y-1/2 hidden xl:flex flex-col items-center gap-3">
-        <div className="w-px h-24" style={{ background: "linear-gradient(to bottom, transparent, #39FF14)" }} />
-        <span
-          className="font-mono text-[9px] tracking-[0.4em] uppercase"
-          style={{
-            color: "rgba(57,255,20,0.4)",
-            writingMode: "vertical-rl",
-            transform: "rotate(180deg)",
-          }}
-        >
-          RACE CONTROL CHANNEL
-        </span>
-        <div className="w-px h-24" style={{ background: "linear-gradient(to top, transparent, #39FF14)" }} />
+      {/* Side vertical text */}
+      <div style={{
+        position: "absolute", left: 20, top: "50%", transform: "translateY(-50%)",
+        display: "flex", flexDirection: "column", alignItems: "center", gap: 12,
+      }}
+        className="hidden-mobile"
+      >
+        <div style={{ width: 1, height: 80, background: "linear-gradient(to bottom, transparent, rgba(232,0,45,0.3))" }} />
+        <span style={{
+          fontFamily: "'IBM Plex Mono', monospace", fontSize: 8,
+          color: "rgba(232,0,45,0.3)", letterSpacing: "0.4em", textTransform: "uppercase",
+          writingMode: "vertical-rl", transform: "rotate(180deg)",
+        }}>RACE CONTROL CHANNEL</span>
+        <div style={{ width: 1, height: 80, background: "linear-gradient(to top, transparent, rgba(232,0,45,0.3))" }} />
       </div>
 
-      <div className="relative max-w-4xl mx-auto px-6">
+      <div style={{ maxWidth: 820, margin: "0 auto", padding: "0 24px" }}>
+
         {/* Header */}
-        <div className="mb-16">
-          <SectionTitle label="Questions & Answers" num="06" title="RACE CONTROL" />
-          <p className="font-mono text-sm text-white/40 mt-4 max-w-lg leading-relaxed">
-            All incoming radio comms from teams. Tap any channel to open the frequency.
+        <div style={{ marginBottom: 52 }}>
+          <div className="section-eyebrow">
+            {FAQ.sectionNum} // {FAQ.sectionLabel}
+          </div>
+          <h2 className="section-title" style={{ fontSize: "clamp(44px, 6.5vw, 82px)" }}>
+            {FAQ.title}
+          </h2>
+          <p style={{
+            fontFamily: "'IBM Plex Mono', monospace", fontSize: 12,
+            color: "var(--ghost, #555)", marginTop: 14, lineHeight: 1.75,
+          }}>
+            Tap any channel to open the frequency.
           </p>
         </div>
 
-        {/* Main FAQ container */}
-        <div
-          className="border border-white/8 overflow-hidden"
-          style={{
-            background: "#0d0d0d",
-            clipPath: "polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px))",
-          }}
-        >
-          {/* Top bar — like a terminal header */}
-          <div
-            className="flex items-center justify-between px-6 py-3 border-b border-white/8"
-            style={{ background: "#161616" }}
-          >
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full" style={{ background: "#FF3B00" }} />
-              <div className="w-2 h-2 rounded-full" style={{ background: "#FFB800" }} />
-              <div className="w-2 h-2 rounded-full" style={{ background: "#39FF14" }} />
-              <span className="font-mono text-[10px] text-white/25 ml-3 tracking-widest">
-                race-control.faq — bash
+        {/* FAQ terminal container */}
+        <div style={{
+          border: "1px solid rgba(255,255,255,0.07)",
+          background: "#0a0a0a",
+          overflow: "hidden",
+          clipPath: "polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px))",
+        }}>
+          {/* Terminal top bar */}
+          <div style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            padding: "10px 18px",
+            background: "#111",
+            borderBottom: "1px solid rgba(255,255,255,0.05)",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              {["#FF3B00", "#FFF200", "#22c55e"].map(c => (
+                <div key={c} style={{ width: 10, height: 10, borderRadius: "50%", background: c, opacity: 0.8 }} />
+              ))}
+              <span style={{
+                fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
+                color: "rgba(255,255,255,0.2)", letterSpacing: "0.2em", marginLeft: 8,
+              }}>race-control.faq — terminal</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#22c55e" }} />
+              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, color: "rgba(255,255,255,0.2)", letterSpacing: "0.25em", textTransform: "uppercase" }}>
+                LIVE
               </span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-              <span className="font-mono text-[9px] text-white/25 tracking-widest">LIVE</span>
-            </div>
           </div>
 
-          {/* FAQ items */}
-          <div>
-            {FAQ_ITEMS.map((item: FAQItem, i: number) => (
-              <div key={item.id} className="relative">
-                <AccordionItem
-                  item={item}
-                  isOpen={openId === item.id}
-                  onToggle={() => toggle(item.id)}
-                  index={i}
-                />
-              </div>
-            ))}
-          </div>
+          {/* Items */}
+          {FAQ.items.map((item, i) => (
+            <Item
+              key={item.id}
+              item={item}
+              isOpen={openId === item.id}
+              onToggle={() => setOpenId(prev => prev === item.id ? "" : item.id)}
+              index={i}
+            />
+          ))}
 
-          {/* Bottom prompt bar */}
-          <div
-            className="px-6 py-3 border-t border-white/8 flex items-center gap-3"
-            style={{ background: "#111" }}
-          >
-            <TerminalPrompt active={true} />
-            <span className="font-mono text-[11px] text-white/20">
-              {FAQ_ITEMS.length} queries indexed — {FAQ_ITEMS.length} resolved
+          {/* Bottom prompt */}
+          <div style={{
+            padding: "10px 18px",
+            background: "#0d0d0d",
+            borderTop: "1px solid rgba(255,255,255,0.05)",
+            display: "flex", alignItems: "center", gap: 6,
+          }}>
+            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "#E8002D" }}>race-control</span>
+            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "rgba(255,255,255,0.2)" }}>@faq:~$</span>
+            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "rgba(255,255,255,0.15)" }}>
+              {FAQ.items.length} queries indexed — {FAQ.items.length} resolved
             </span>
+            <Cursor active={true} />
           </div>
         </div>
 
-        {/* Extra help block */}
+        {/* Help CTA */}
         <motion.div
-          className="mt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 border border-white/8"
-          style={{
-            background: "rgba(57,255,20,0.03)",
-            borderColor: "rgba(57,255,20,0.15)",
-          }}
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
+          style={{
+            marginTop: 24,
+            padding: "18px 22px",
+            border: "1px solid rgba(232,0,45,0.15)",
+            background: "rgba(232,0,45,0.03)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: 16,
+          }}
         >
           <div>
-            <p className="font-display text-lg text-white tracking-wide">Still have questions?</p>
-            <p className="font-mono text-xs text-white/40 mt-1">
+            <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 20, color: "#F0EDE8", letterSpacing: "0.07em" }}>
+              Still have questions?
+            </p>
+            <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: "rgba(255,255,255,0.3)", marginTop: 3 }}>
               Open a direct comms channel with the race director.
             </p>
           </div>
           <a
             href="mailto:hackdays@acm.org"
-            className="font-mono text-xs tracking-widest px-6 py-3 border transition-all duration-200 flex-shrink-0 uppercase"
             style={{
-              borderColor: "#39FF14",
-              color: "#39FF14",
-              background: "rgba(57,255,20,0.08)",
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: 10,
+              letterSpacing: "0.25em",
+              textTransform: "uppercase",
+              color: "#000",
+              background: "#E8002D",
+              padding: "11px 24px",
+              textDecoration: "none",
+              fontWeight: 700,
+              display: "inline-block",
+              clipPath: "polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%)",
+              flexShrink: 0,
             }}
           >
             RADIO IN →

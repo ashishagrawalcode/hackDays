@@ -1,118 +1,158 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ArrowUpRight } from "lucide-react";
 import { NAV_LINKS, SITE_META } from "@/lib/constants";
-import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
 export function Navbar() {
-  const [scrolled, setScrolled]   = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState("home");
+  const [scrolled,    setScrolled]    = useState(false);
+  const [mobileOpen,  setMobileOpen]  = useState(false);
+  const [activeHref,  setActiveHref]  = useState("home");
 
-  // Scroll detection
+  // Scroll shrink
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
+    const onScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Active section tracking via IntersectionObserver
+  // Active section tracking
   useEffect(() => {
-    const sections = document.querySelectorAll<HTMLElement>("section[id], div[id]");
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
-          }
-        });
+    const sectionIds = NAV_LINKS.map(l => l.href.replace("#", ""));
+    const els = sectionIds
+      .map(id => document.getElementById(id))
+      .filter(Boolean) as HTMLElement[];
+
+    const obs = new IntersectionObserver(
+      entries => {
+        entries.forEach(e => { if (e.isIntersecting) setActiveHref(e.target.id); });
       },
-      { rootMargin: "-40% 0px -55% 0px" }
+      { rootMargin: "-45% 0px -50% 0px" }
     );
-    sections.forEach((s) => observer.observe(s));
-    return () => observer.disconnect();
+    els.forEach(el => obs.observe(el));
+    return () => obs.disconnect();
   }, []);
 
-  const handleNavClick = (href: string) => {
+  const scrollTo = (href: string) => {
     setMobileOpen(false);
     const id = href.replace("#", "");
-    const el = document.getElementById(id);
-    el?.scrollIntoView({ behavior: "smooth" });
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
     <>
       <motion.header
-        className={cn(
-          "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-          scrolled && "top-3"
-        )}
-        initial={{ y: -80, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.7, delay: 3.8, ease: "easeOut" }}
+        initial={{ y: -64, opacity: 0 }}
+        animate={{ y: 0,   opacity: 1 }}
+        transition={{ duration: 0.6, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+        style={{
+          position: "fixed",
+          top: scrolled ? 12 : 0,
+          left: 0, right: 0,
+          zIndex: 1000,
+          transition: "top 0.3s",
+        }}
       >
-        <div className={cn(
-          "mx-auto flex items-center justify-between h-14 px-5 sm:px-8",
-          "transition-all duration-300",
-          scrolled
-            ? "max-w-5xl rounded-sm border backdrop-blur-xl"
-            : "max-w-full border-b",
-        )}
-          style={{
-            background: scrolled
-              ? "rgba(5,5,5,0.88)"
-              : "rgba(5,5,5,0.72)",
-            borderColor: "rgba(255,255,255,0.06)",
-          }}
-        >
+        <div style={{
+          margin: scrolled ? "0 auto" : 0,
+          maxWidth: scrolled ? 980 : "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          height: 60,
+          padding: "0 24px",
+          background: scrolled
+            ? "rgba(3,3,3,0.92)"
+            : "rgba(3,3,3,0.7)",
+          borderBottom: scrolled ? "none" : "1px solid rgba(255,255,255,0.04)",
+          border: scrolled ? "1px solid rgba(255,255,255,0.07)" : undefined,
+          backdropFilter: "blur(16px)",
+          transition: "all 0.3s ease",
+        }}>
+
           {/* Logo */}
           <a
             href="#home"
-            onClick={(e) => { e.preventDefault(); handleNavClick("#home"); }}
-            className="flex items-center gap-2 group"
+            data-hover
+            onClick={e => { e.preventDefault(); scrollTo("#home"); }}
+            style={{
+              display: "flex", alignItems: "center", gap: 10,
+              textDecoration: "none",
+            }}
           >
-            <div
-              className="w-6 h-6 relative flex-shrink-0"
-              style={{
-                clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)",
-                background: "var(--phosphor)",
-              }}
-            />
-            <span
-              className="font-display text-xl tracking-widest text-white group-hover:text-phosphor transition-colors duration-200"
-            >
+            {/* F1-style geometric mark */}
+            <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+              <polygon
+                points="13,1 25,7 25,19 13,25 1,19 1,7"
+                stroke="var(--f1red)"
+                strokeWidth="1.5"
+                fill="rgba(232,0,45,0.08)"
+              />
+              <text
+                x="13" y="17.5"
+                textAnchor="middle"
+                style={{
+                  fontFamily: "'Bebas Neue',sans-serif",
+                  fontSize: 11,
+                  fill: "var(--f1red)",
+                  letterSpacing: "0.05em",
+                }}
+              >HD</text>
+            </svg>
+            <span style={{
+              fontFamily: "'Bebas Neue',sans-serif",
+              fontSize: 22,
+              letterSpacing: "0.12em",
+              color: "var(--white)",
+            }}>
               HACKDAYS
             </span>
-            <span
-              className="font-mono text-[9px] tracking-[0.3em] mt-1"
-              style={{ color: "var(--amber)" }}
-            >
-              '26
-            </span>
+            <span style={{
+              fontFamily: "'IBM Plex Mono',monospace",
+              fontSize: 10,
+              color: "var(--amber)",
+              letterSpacing: "0.2em",
+              marginTop: 2,
+            }}>'26</span>
           </a>
 
-          {/* Desktop links */}
-          <nav className="hidden lg:flex items-center gap-7">
-            {NAV_LINKS.map((link) => {
-              const isActive = activeSection === link.href.replace("#", "");
+          {/* Desktop nav */}
+          <nav style={{ display: "flex", alignItems: "center", gap: 32 }}>
+            {NAV_LINKS.map(link => {
+              const isActive = activeHref === link.href.replace("#", "");
               return (
                 <button
                   key={link.href}
-                  onClick={() => handleNavClick(link.href)}
-                  className={cn(
-                    "font-mono text-[9px] tracking-[0.25em] uppercase transition-colors duration-200 relative",
-                    isActive ? "text-phosphor" : "text-white/50 hover:text-white/80"
-                  )}
+                  data-hover
+                  onClick={() => scrollTo(link.href)}
+                  style={{
+                    fontFamily: "'IBM Plex Mono',monospace",
+                    fontSize: 9,
+                    letterSpacing: "0.28em",
+                    textTransform: "uppercase",
+                    color: isActive ? "var(--white)" : "rgba(240,237,232,0.35)",
+                    background: "none",
+                    border: "none",
+                    cursor: "none",
+                    padding: "4px 0",
+                    position: "relative",
+                    transition: "color 0.2s",
+                  }}
+                  className="hidden lg:inline-block"
                 >
                   {link.label}
                   {isActive && (
                     <motion.span
-                      layoutId="nav-dot"
-                      className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
-                      style={{ background: "var(--phosphor)" }}
+                      layoutId="nav-active"
+                      style={{
+                        position: "absolute",
+                        bottom: -2, left: 0, right: 0,
+                        height: 1,
+                        background: "var(--f1red)",
+                        boxShadow: "0 0 6px var(--f1red)",
+                      }}
                     />
                   )}
                 </button>
@@ -120,31 +160,53 @@ export function Navbar() {
             })}
           </nav>
 
-          {/* CTA */}
-          <div className="hidden lg:flex">
-            <Button
-              variant="outline"
-              size="sm"
+          {/* Register CTA */}
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <a
               href="https://unstop.com"
-              external
-              icon={<ArrowUpRight size={12} />}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-hover
+              className="hidden lg:inline-flex"
+              style={{
+                fontFamily: "'IBM Plex Mono',monospace",
+                fontSize: 9,
+                letterSpacing: "0.25em",
+                textTransform: "uppercase",
+                color: "#000",
+                background: "var(--f1red)",
+                padding: "9px 20px",
+                clipPath: "polygon(7px 0%,100% 0%,calc(100% - 7px) 100%,0% 100%)",
+                textDecoration: "none",
+                fontWeight: 700,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                transition: "background 0.2s",
+              }}
+              onMouseEnter={e => (e.currentTarget.style.background = "#fff")}
+              onMouseLeave={e => (e.currentTarget.style.background = "var(--f1red)")}
             >
-              Register
-            </Button>
-          </div>
+              Register <ArrowUpRight size={11} />
+            </a>
 
-          {/* Mobile hamburger */}
-          <button
-            className="lg:hidden p-2 border rounded-sm"
-            style={{ borderColor: "rgba(255,255,255,0.1)" }}
-            onClick={() => setMobileOpen((v) => !v)}
-            aria-label="Toggle menu"
-          >
-            {mobileOpen
-              ? <X size={18} className="text-phosphor" />
-              : <Menu size={18} className="text-white/70" />
-            }
-          </button>
+            {/* Mobile hamburger */}
+            <button
+              className="lg:hidden"
+              data-hover
+              onClick={() => setMobileOpen(v => !v)}
+              style={{
+                background: "none",
+                border: "1px solid rgba(255,255,255,0.1)",
+                color: "var(--white)",
+                padding: 8,
+                cursor: "none",
+                display: "flex", alignItems: "center",
+              }}
+            >
+              {mobileOpen ? <X size={17} /> : <Menu size={17} />}
+            </button>
+          </div>
         </div>
       </motion.header>
 
@@ -152,43 +214,85 @@ export function Navbar() {
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
-            key="mobile-menu"
-            initial={{ opacity: 0, y: -20 }}
+            key="mobile"
+            initial={{ opacity: 0, y: -16 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-            className="fixed top-[72px] left-0 right-0 z-40 border-b"
+            exit={{ opacity: 0, y: -16 }}
+            transition={{ duration: 0.25 }}
             style={{
-              background: "rgba(5,5,5,0.98)",
-              borderColor: "rgba(255,255,255,0.06)",
+              position: "fixed",
+              top: 72, left: 0, right: 0,
+              zIndex: 999,
+              background: "rgba(3,3,3,0.97)",
+              borderBottom: "1px solid rgba(255,255,255,0.06)",
               backdropFilter: "blur(20px)",
+              padding: "16px 24px 24px",
             }}
           >
-            <div className="flex flex-col py-4 px-6 gap-1">
-              {NAV_LINKS.map((link, i) => (
-                <motion.button
-                  key={link.href}
-                  initial={{ opacity: 0, x: -12 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.05 }}
-                  onClick={() => handleNavClick(link.href)}
-                  className="flex items-center gap-3 py-3 border-b text-left"
-                  style={{ borderColor: "rgba(255,255,255,0.04)" }}
-                >
-                  <span className="font-mono text-[9px] tracking-[0.3em]" style={{ color: "var(--phosphor)", opacity: 0.5 }}>
-                    0{i + 1}
-                  </span>
-                  <span className="font-mono text-[11px] tracking-[0.2em] uppercase text-white/70">
-                    {link.label}
-                  </span>
-                </motion.button>
-              ))}
-              <div className="pt-4">
-                <Button variant="primary" size="sm" href="https://unstop.com" external>
-                  Register Now ↗
-                </Button>
-              </div>
-            </div>
+            {NAV_LINKS.map((link, i) => (
+              <motion.button
+                key={link.href}
+                data-hover
+                initial={{ opacity: 0, x: -12 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.04 }}
+                onClick={() => scrollTo(link.href)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  width: "100%",
+                  padding: "14px 0",
+                  borderBottom: "1px solid rgba(255,255,255,0.04)",
+                  background: "none",
+                  border: "none",
+                  cursor: "none",
+                  textAlign: "left",
+                }}
+              >
+                <span style={{
+                  fontFamily: "'IBM Plex Mono',monospace",
+                  fontSize: 9,
+                  color: "var(--f1red)",
+                  opacity: 0.5,
+                  letterSpacing: "0.3em",
+                }}>
+                  0{i + 1}
+                </span>
+                <span style={{
+                  fontFamily: "'IBM Plex Mono',monospace",
+                  fontSize: 12,
+                  letterSpacing: "0.2em",
+                  textTransform: "uppercase",
+                  color: "rgba(240,237,232,0.7)",
+                }}>
+                  {link.label}
+                </span>
+              </motion.button>
+            ))}
+            <a
+              href="https://unstop.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                marginTop: 16,
+                fontFamily: "'IBM Plex Mono',monospace",
+                fontSize: 10,
+                letterSpacing: "0.25em",
+                textTransform: "uppercase",
+                color: "#000",
+                background: "var(--f1red)",
+                padding: "12px 24px",
+                clipPath: "polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%)",
+                textDecoration: "none",
+                fontWeight: 700,
+              }}
+            >
+              Register Now ↗
+            </a>
           </motion.div>
         )}
       </AnimatePresence>

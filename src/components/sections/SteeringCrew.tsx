@@ -1,298 +1,183 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { motion, useInView, AnimatePresence } from "framer-motion";
-import { SectionTitle } from "@/components/ui/SectionTitle";
-import { SITE_DATA } from "@/lib/constants";
+import { motion, useInView } from "framer-motion";
+import { TEAM } from "@/lib/constants";
 
-/* ─────────────────────────────────────────────
-   CREW DATA — pulled from constants or defined here
-───────────────────────────────────────────── */
-const CREW_MEMBERS = (SITE_DATA as any).crew ?? [
-  {
-    id: "01",
-    name: "Arjun Mehta",
-    role: "Race Director",
-    dept: "Core Org",
-    bio: "Oversees the full event, track conditions, and final jury decisions. Five years running hackathons at national level.",
-    socials: { linkedin: "#", twitter: "#" },
-    accent: "#39FF14",
-    initials: "AM",
-  },
-  {
-    id: "02",
-    name: "Priya Sharma",
-    role: "Pit Lane Lead",
-    dept: "Logistics",
-    bio: "Manages team check-ins, resource allocation, and pit-stop mentorship scheduling. The operational backbone.",
-    socials: { linkedin: "#", twitter: "#" },
-    accent: "#FFB800",
-    initials: "PS",
-  },
-  {
-    id: "03",
-    name: "Rahul Verma",
-    role: "Tech Steward",
-    dept: "Engineering",
-    bio: "Runs infra, APIs, and judging systems. Built the submission portal and real-time leaderboard from scratch.",
-    socials: { linkedin: "#", twitter: "#" },
-    accent: "#00E5FF",
-    initials: "RV",
-  },
-  {
-    id: "04",
-    name: "Sneha Kapoor",
-    role: "Design Parc Fermé",
-    dept: "Creative",
-    bio: "Owns visual identity, sponsor decks, and UI/UX workshops during the hack. Previously at a top D2C brand.",
-    socials: { linkedin: "#", twitter: "#" },
-    accent: "#FF3B00",
-    initials: "SK",
-  },
-  {
-    id: "05",
-    name: "Dev Anand",
-    role: "Sponsor Liaison",
-    dept: "Partnerships",
-    bio: "Manages all sponsor relationships and ensures partner integrations are built into challenges properly.",
-    socials: { linkedin: "#", twitter: "#" },
-    accent: "#39FF14",
-    initials: "DA",
-  },
-  {
-    id: "06",
-    name: "Aisha Khan",
-    role: "Media & Comms",
-    dept: "Marketing",
-    bio: "Runs social coverage, live documentation, and post-event recaps. If it happened, Aisha captured it.",
-    socials: { linkedin: "#", twitter: "#" },
-    accent: "#FFB800",
-    initials: "AK",
-  },
-];
+const ACCENTS = ["#E8002D", "#FFF200", "#00D2FF", "#FF6B00", "#E8002D", "#FFF200"];
 
-/* ─────────────────────────────────────────────
-   AVATAR COMPONENT — geometric placeholder
-───────────────────────────────────────────── */
-function CrewAvatar({ initials, accent }: { initials: string; accent: string }) {
+/* ─────────────────────────────────────────────────────────────
+   PHOTO AVATAR — real photo with geometric overlay
+───────────────────────────────────────────────────────────── */
+function Avatar({ photo, name, accent }: { photo: string; name: string; accent: string }) {
+  const initials = name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+  const [imgFailed, setImgFailed] = useState(false);
+
   return (
-    <div
-      className="relative w-full aspect-square flex items-center justify-center overflow-hidden"
-      style={{
-        background: `radial-gradient(ellipse at 30% 30%, ${accent}18, #0a0a0a)`,
-      }}
-    >
-      {/* Grid lines */}
-      <div
-        className="absolute inset-0 opacity-10"
-        style={{
-          backgroundImage: `
-            linear-gradient(${accent}40 1px, transparent 1px),
-            linear-gradient(90deg, ${accent}40 1px, transparent 1px)
-          `,
-          backgroundSize: "24px 24px",
-        }}
-      />
+    <div style={{
+      position: "relative",
+      width: "100%",
+      aspectRatio: "1",
+      overflow: "hidden",
+      background: `radial-gradient(ellipse at 30% 30%, ${accent}18, #080808)`,
+    }}>
+      {/* Grid overlay */}
+      <div style={{
+        position: "absolute", inset: 0, opacity: 0.08,
+        backgroundImage: `linear-gradient(${accent}60 1px, transparent 1px), linear-gradient(90deg, ${accent}60 1px, transparent 1px)`,
+        backgroundSize: "24px 24px",
+      }} />
 
-      {/* Diagonal accent lines */}
-      <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-        <line x1="0" y1="0" x2="100" y2="100" stroke={accent} strokeWidth="0.3" strokeOpacity="0.3" />
-        <line x1="100" y1="0" x2="0" y2="100" stroke={accent} strokeWidth="0.3" strokeOpacity="0.15" />
-        <circle cx="50" cy="50" r="35" stroke={accent} strokeWidth="0.5" fill="none" strokeOpacity="0.25" />
-        <circle cx="50" cy="50" r="20" stroke={accent} strokeWidth="0.5" fill="none" strokeOpacity="0.15" />
+      {/* SVG decorations */}
+      <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }} viewBox="0 0 100 100" preserveAspectRatio="none">
+        <line x1="0" y1="0" x2="100" y2="100" stroke={accent} strokeWidth="0.3" opacity="0.2" />
+        <circle cx="50" cy="50" r="34" stroke={accent} strokeWidth="0.5" fill="none" opacity="0.18" />
+        <circle cx="50" cy="50" r="20" stroke={accent} strokeWidth="0.4" fill="none" opacity="0.1" />
       </svg>
 
-      {/* Initials */}
-      <span
-        className="relative z-10 font-display text-5xl tracking-widest"
-        style={{ color: accent, textShadow: `0 0 30px ${accent}80` }}
-      >
-        {initials}
-      </span>
-
-      {/* Corner accents */}
-      {[
-        "top-0 left-0 border-t-2 border-l-2",
-        "top-0 right-0 border-t-2 border-r-2",
-        "bottom-0 left-0 border-b-2 border-l-2",
-        "bottom-0 right-0 border-b-2 border-r-2",
-      ].map((cls, i) => (
-        <div
-          key={i}
-          className={`absolute w-5 h-5 ${cls}`}
-          style={{ borderColor: `${accent}70` }}
+      {/* Photo or initials */}
+      {photo && !imgFailed ? (
+        <img
+          src={photo}
+          alt={name}
+          onError={() => setImgFailed(true)}
+          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
         />
+      ) : (
+        <div style={{
+          position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          <span style={{
+            fontFamily: "'Bebas Neue', sans-serif",
+            fontSize: 52,
+            color: accent,
+            textShadow: `0 0 30px ${accent}80`,
+            letterSpacing: "0.1em",
+          }}>{initials}</span>
+        </div>
+      )}
+
+      {/* Corner brackets */}
+      {[
+        { top: 0, left: 0, borderTop: `2px solid ${accent}60`, borderLeft: `2px solid ${accent}60` },
+        { top: 0, right: 0, borderTop: `2px solid ${accent}60`, borderRight: `2px solid ${accent}60` },
+        { bottom: 0, left: 0, borderBottom: `2px solid ${accent}60`, borderLeft: `2px solid ${accent}60` },
+        { bottom: 0, right: 0, borderBottom: `2px solid ${accent}60`, borderRight: `2px solid ${accent}60` },
+      ].map((s, i) => (
+        <div key={i} style={{ position: "absolute", width: 20, height: 20, ...s }} />
       ))}
+
+      {/* Scan line */}
+      <motion.div
+        style={{
+          position: "absolute", left: 0, right: 0, height: "40%",
+          background: `linear-gradient(180deg, transparent, ${accent}0a, transparent)`,
+          pointerEvents: "none",
+        }}
+        animate={{ y: ["-100%", "300%"] }}
+        transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
+      />
     </div>
   );
 }
 
-/* ─────────────────────────────────────────────
-   CREW CARD
-───────────────────────────────────────────── */
-interface CrewMember {
-  id: string;
-  name: string;
-  role: string;
-  dept: string;
-  bio: string;
-  socials?: { linkedin?: string; twitter?: string };
+/* ─────────────────────────────────────────────────────────────
+   CREW CARD — 3D flip
+───────────────────────────────────────────────────────────── */
+function CrewCard({ member, index, accent }: {
+  member: { name: string; role: string; photo: string };
+  index: number;
   accent: string;
-  initials: string;
-}
-
-function CrewCard({ member, index }: { member: CrewMember; index: number }) {
+}) {
   const [flipped, setFlipped] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-60px" });
+  const inView = useInView(ref, { once: true, margin: "-60px" });
 
   return (
     <motion.div
       ref={ref}
-      className="relative"
-      initial={{ opacity: 0, y: 40 }}
-      animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ delay: index * 0.08, duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
       style={{ perspective: "1000px" }}
+      initial={{ opacity: 0, y: 40 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ delay: index * 0.1, duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] }}
     >
       <motion.div
-        className="relative w-full cursor-pointer"
-        style={{ transformStyle: "preserve-3d" }}
+        style={{ transformStyle: "preserve-3d", cursor: "pointer", position: "relative", width: "100%" }}
         animate={{ rotateY: flipped ? 180 : 0 }}
-        transition={{ duration: 0.55, ease: [0.4, 0, 0.2, 1] }}
-        onClick={() => setFlipped((f) => !f)}
+        transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+        onClick={() => setFlipped(f => !f)}
       >
         {/* FRONT */}
-        <div
-          className="relative border border-white/8 overflow-hidden group"
-          style={{
-            backfaceVisibility: "hidden",
-            WebkitBackfaceVisibility: "hidden",
-            clipPath: "polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%)",
-          }}
-        >
-          {/* Avatar */}
-          <CrewAvatar initials={member.initials} accent={member.accent} />
-
-          {/* Bottom info bar */}
-          <div
-            className="relative p-4 border-t border-white/8"
-            style={{ background: "#0f0f0f" }}
-          >
-            {/* Accent bar */}
-            <div
-              className="absolute top-0 left-0 right-0 h-[2px]"
-              style={{ background: `linear-gradient(90deg, ${member.accent}, transparent)` }}
-            />
-
-            <div className="flex items-start justify-between">
-              <div>
-                <h3 className="font-display text-lg text-white tracking-wide uppercase leading-tight">
-                  {member.name}
-                </h3>
-                <p className="font-mono text-[11px] mt-0.5" style={{ color: member.accent }}>
-                  {member.role}
-                </p>
-              </div>
-              <span
-                className="font-mono text-[9px] tracking-widest px-2 py-1 self-start"
-                style={{
-                  color: member.accent,
-                  border: `1px solid ${member.accent}30`,
-                  background: `${member.accent}10`,
-                }}
-              >
-                {member.dept}
-              </span>
-            </div>
-
-            {/* Flip hint */}
-            <p className="font-mono text-[9px] text-white/20 mt-3 tracking-widest uppercase">
-              CLICK FOR BIO →
+        <div style={{
+          backfaceVisibility: "hidden",
+          WebkitBackfaceVisibility: "hidden",
+          border: "1px solid rgba(255,255,255,0.07)",
+          overflow: "hidden",
+          clipPath: "polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%)",
+        }}>
+          <Avatar photo={member.photo} name={member.name} accent={accent} />
+          <div style={{ background: "#0d0d0d", padding: "16px 18px", position: "relative" }}>
+            <div style={{
+              position: "absolute", top: 0, left: 0, right: 0, height: 2,
+              background: `linear-gradient(90deg, ${accent}, transparent)`,
+            }} />
+            <h3 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 22, color: "#F0EDE8", letterSpacing: "0.06em", textTransform: "uppercase", lineHeight: 1.1 }}>
+              {member.name}
+            </h3>
+            <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: accent, marginTop: 4 }}>
+              {member.role}
             </p>
+            <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, color: "rgba(255,255,255,0.2)", marginTop: 10, letterSpacing: "0.2em", textTransform: "uppercase" }}>
+              TAP FOR PROFILE →
+            </p>
+            {/* Index */}
+            <div style={{
+              position: "absolute", top: 14, right: 16,
+              fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
+              color: `${accent}40`, letterSpacing: "0.15em",
+            }}>
+              #{String(index + 1).padStart(2, "0")}
+            </div>
           </div>
-
-          {/* ID watermark */}
-          <div
-            className="absolute top-3 left-3 font-mono text-[10px] tracking-widest"
-            style={{ color: `${member.accent}50` }}
-          >
-            #{member.id}
-          </div>
-
-          {/* Hover scan line */}
-          <motion.div
-            className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100"
-            style={{
-              background: `linear-gradient(180deg, transparent 0%, ${member.accent}08 50%, transparent 100%)`,
-            }}
-            animate={{ y: ["-100%", "200%"] }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-          />
         </div>
 
         {/* BACK */}
-        <div
-          className="absolute inset-0 border overflow-hidden flex flex-col"
-          style={{
-            backfaceVisibility: "hidden",
-            WebkitBackfaceVisibility: "hidden",
-            transform: "rotateY(180deg)",
-            borderColor: `${member.accent}40`,
-            background: `linear-gradient(135deg, #0f0f0f, #161616)`,
-            clipPath: "polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%)",
-          }}
-        >
-          {/* Top strip */}
-          <div
-            className="h-1 w-full"
-            style={{ background: member.accent }}
-          />
-
-          <div className="flex-1 p-5 flex flex-col justify-between">
-            {/* Header */}
-            <div>
-              <p className="font-mono text-[9px] tracking-[0.3em] uppercase mb-1" style={{ color: member.accent }}>
-                CREW FILE / {member.dept}
-              </p>
-              <h3 className="font-display text-xl text-white tracking-widest uppercase">{member.name}</h3>
-              <p className="font-mono text-[11px] text-white/50 mt-1">{member.role}</p>
+        <div style={{
+          backfaceVisibility: "hidden",
+          WebkitBackfaceVisibility: "hidden",
+          transform: "rotateY(180deg)",
+          position: "absolute", inset: 0,
+          border: `1px solid ${accent}35`,
+          background: "linear-gradient(135deg, #0e0e0e, #161616)",
+          clipPath: "polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%)",
+          display: "flex", flexDirection: "column",
+          overflow: "hidden",
+        }}>
+          <div style={{ height: 2, background: accent }} />
+          <div style={{ flex: 1, padding: "20px 18px", display: "flex", flexDirection: "column" }}>
+            <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, color: accent, letterSpacing: "0.3em", textTransform: "uppercase", marginBottom: 6 }}>
+              CREW FILE
+            </p>
+            <h3 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 24, color: "#F0EDE8", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+              {member.name}
+            </h3>
+            <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: "rgba(255,255,255,0.45)", marginTop: 4 }}>
+              {member.role}
+            </p>
+            <div style={{ height: 1, margin: "16px 0", background: `linear-gradient(90deg, ${accent}50, transparent)` }} />
+            {/* Geometric accent */}
+            <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+                <polygon points="32,4 60,20 60,44 32,60 4,44 4,20" stroke={accent} strokeWidth="1" fill={`${accent}08`} />
+                <polygon points="32,14 50,24 50,40 32,50 14,40 14,24" stroke={accent} strokeWidth="0.5" fill="none" opacity="0.5" />
+                <text x="32" y="36" textAnchor="middle"
+                  style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 14, fill: accent, letterSpacing: "0.05em" }}>
+                  {member.name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase()}
+                </text>
+              </svg>
             </div>
-
-            {/* Divider */}
-            <div className="h-px my-4" style={{ background: `linear-gradient(90deg, ${member.accent}50, transparent)` }} />
-
-            {/* Bio */}
-            <p className="font-mono text-[12px] text-white/60 leading-relaxed flex-1">{member.bio}</p>
-
-            {/* Socials */}
-            <div className="mt-4 flex gap-3">
-              <a
-                href={member.socials?.linkedin || "#"}
-                onClick={(e) => e.stopPropagation()}
-                className="font-mono text-[10px] tracking-widest px-3 py-1.5 border transition-colors duration-200"
-                style={{
-                  borderColor: `${member.accent}40`,
-                  color: member.accent,
-                }}
-              >
-                LINKEDIN
-              </a>
-              <a
-                href={member.socials?.twitter || "#"}
-                onClick={(e) => e.stopPropagation()}
-                className="font-mono text-[10px] tracking-widest px-3 py-1.5 border transition-colors duration-200"
-                style={{
-                  borderColor: `${member.accent}40`,
-                  color: member.accent,
-                }}
-              >
-                TWITTER
-              </a>
-            </div>
-
-            <p className="font-mono text-[9px] text-white/20 mt-3 tracking-widest uppercase">
-              ← CLICK TO FLIP BACK
+            <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, color: "rgba(255,255,255,0.18)", letterSpacing: "0.2em", textTransform: "uppercase", marginTop: 12 }}>
+              ← TAP TO FLIP BACK
             </p>
           </div>
         </div>
@@ -301,129 +186,106 @@ function CrewCard({ member, index }: { member: CrewMember; index: number }) {
   );
 }
 
-/* ─────────────────────────────────────────────
-   DEPT FILTER BAR
-───────────────────────────────────────────── */
-const DEPTS: string[] = ["ALL", ...Array.from(new Set(CREW_MEMBERS.map((m: any) => m.dept))) as string[]];
-
-
-function DeptFilter({
-  active,
-  onChange,
-}: {
-  active: string;
-  onChange: (d: string) => void;
-}) {
-  return (
-    <div className="flex flex-wrap gap-2 justify-center mb-12">
-      {DEPTS.map((dept: string, index: number) => (
-        <button
-          key={dept || `dept-${index}`}
-          onClick={() => onChange(dept)}
-          className="font-mono text-[10px] tracking-[0.2em] px-4 py-2 border transition-all duration-200 uppercase"
-          style={{
-            borderColor: active === dept ? "#39FF14" : "rgba(255,255,255,0.1)",
-            color: active === dept ? "#39FF14" : "rgba(255,255,255,0.4)",
-            background: active === dept ? "rgba(57,255,20,0.08)" : "transparent",
-          }}
-        >
-          {dept}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-/* ─────────────────────────────────────────────
-   SECTION EXPORT
-───────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────
+   SECTION EXPORT — id="team" matches NAV_LINKS
+───────────────────────────────────────────────────────────── */
 export function SteeringCrew() {
-  const [activeDept, setActiveDept] = useState("ALL");
-
-  const filtered =
-    activeDept === "ALL"
-      ? CREW_MEMBERS
-      : CREW_MEMBERS.filter((m: any) => m.dept === activeDept);
-
   return (
     <section
-      id="crew"
-      className="relative py-32 overflow-hidden"
-      style={{ background: "#050505" }}
+      id="team"         // ← must match NAV_LINKS href="#team"
+      style={{
+        position: "relative",
+        padding: "100px 0",
+        background: "#030303",
+        overflow: "hidden",
+      }}
     >
-      {/* Diagonal stripe accent — top-right */}
-      <div
-        className="absolute top-0 right-0 w-64 h-64 pointer-events-none opacity-5"
-        style={{
-          background: "repeating-linear-gradient(-45deg, #39FF14, #39FF14 1px, transparent 1px, transparent 16px)",
-        }}
-      />
+      {/* Diagonal stripe accents */}
+      <div style={{
+        position: "absolute", top: 0, right: 0, width: 220, height: 220,
+        background: "repeating-linear-gradient(-45deg, rgba(232,0,45,0.04), rgba(232,0,45,0.04) 1px, transparent 1px, transparent 14px)",
+        pointerEvents: "none",
+      }} />
+      <div style={{
+        position: "absolute", bottom: 0, left: 0, width: 160, height: 160,
+        background: "repeating-linear-gradient(-45deg, rgba(255,242,0,0.03), rgba(255,242,0,0.03) 1px, transparent 1px, transparent 14px)",
+        pointerEvents: "none",
+      }} />
 
-      {/* Diagonal stripe accent — bottom-left */}
-      <div
-        className="absolute bottom-0 left-0 w-48 h-48 pointer-events-none opacity-5"
-        style={{
-          background: "repeating-linear-gradient(-45deg, #FFB800, #FFB800 1px, transparent 1px, transparent 16px)",
-        }}
-      />
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 24px" }}>
 
-      <div className="relative max-w-7xl mx-auto px-6">
         {/* Header */}
-        <div className="text-center mb-16">
-          <SectionTitle label="Organizers" num="05" title="STEERING CREW" />
-          <p className="font-mono text-sm text-white/40 mt-4 max-w-md mx-auto leading-relaxed">
-            The engineers behind the race. Click any card to reveal their full driver profile.
+        <div style={{ marginBottom: 56 }}>
+          <div className="section-eyebrow">
+            {TEAM.sectionNum} // {TEAM.sectionLabel}
+          </div>
+          <h2 className="section-title" style={{ fontSize: "clamp(48px, 7vw, 88px)" }}>
+            {TEAM.title}
+          </h2>
+          <p style={{
+            fontFamily: "'IBM Plex Mono', monospace",
+            fontSize: 12,
+            color: "var(--ghost, #555)",
+            marginTop: 14,
+            maxWidth: 420,
+            lineHeight: 1.75,
+          }}>
+            {TEAM.subtitle}
           </p>
         </div>
 
-        {/* Dept filter */}
-        <DeptFilter active={activeDept} onChange={setActiveDept} />
+        {/* Cards grid */}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: `repeat(${Math.min(TEAM.members.length, 3)}, 1fr)`,
+          gap: 24,
+          maxWidth: TEAM.members.length <= 3 ? 800 : "100%",
+        }}>
+          {TEAM.members.map((member, i) => (
+            <CrewCard key={member.name} member={member} index={i} accent={ACCENTS[i % ACCENTS.length]} />
+          ))}
+        </div>
 
-        {/* Grid */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeDept}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
-          >
-            {filtered.map((member: any, i: number) => (
-              <CrewCard key={member.id || i} member={member} index={i} />
-            ))}
-          </motion.div>
-        </AnimatePresence>
-
-        {/* Bottom stat strip */}
+        {/* Stat strip */}
         <motion.div
-          className="mt-20 grid grid-cols-3 border border-white/8 overflow-hidden"
-          style={{
-            background: "#0a0a0a",
-          }}
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
+          style={{
+            marginTop: 56,
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            border: "1px solid rgba(255,255,255,0.06)",
+            background: "#080808",
+            overflow: "hidden",
+          }}
         >
           {[
-            { label: "Organizers", value: String(CREW_MEMBERS.length), accent: "#39FF14" },
-            { label: "Departments", value: String(DEPTS.length - 1), accent: "#FFB800" },
-            { label: "Combined Hours", value: "200+", accent: "#00E5FF" },
+            { label: "Organizers",  value: String(TEAM.members.length), accent: "#E8002D" },
+            { label: "Combined Roles", value: String(new Set(TEAM.members.map(m => m.role)).size), accent: "#FFF200" },
+            { label: "Event Hours", value: "24+",                        accent: "#00D2FF" },
           ].map((stat, i) => (
-            <div
-              key={i}
-              className="p-6 text-center border-r last:border-r-0 border-white/8"
-            >
-              <p
-                className="font-display text-4xl"
-                style={{ color: stat.accent, textShadow: `0 0 20px ${stat.accent}60` }}
-              >
-                {stat.value}
-              </p>
-              <p className="font-mono text-[10px] text-white/30 tracking-widest uppercase mt-1">
-                {stat.label}
-              </p>
+            <div key={i} style={{
+              padding: "24px 20px",
+              textAlign: "center",
+              borderRight: i < 2 ? "1px solid rgba(255,255,255,0.05)" : undefined,
+            }}>
+              <p style={{
+                fontFamily: "'Bebas Neue', sans-serif",
+                fontSize: 44,
+                color: stat.accent,
+                textShadow: `0 0 18px ${stat.accent}60`,
+                letterSpacing: "0.05em",
+              }}>{stat.value}</p>
+              <p style={{
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: 9,
+                color: "rgba(255,255,255,0.25)",
+                letterSpacing: "0.25em",
+                textTransform: "uppercase",
+                marginTop: 4,
+              }}>{stat.label}</p>
             </div>
           ))}
         </motion.div>
