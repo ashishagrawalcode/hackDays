@@ -8,7 +8,7 @@ export const SITE_META = {
   tagline: "24 Hours. Zero Limits. One Finish Line.",
   organizer: "ACM Student Chapter",
   university: "BML Munjal University",
-  registerUrl: "https://unstop.com",
+  registerUrl: "https://unstop.com/college-fests/glitch-20-bml-munjal-university-bmu-gurgaon-452532",
   year: "2026",
 } as const;
 
