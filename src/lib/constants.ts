@@ -151,9 +151,9 @@ export const TEAM: {
   title: "The HackDays Crew.",
   subtitle: "Architects of the 2026 HackDays Technical Infrastructure.",
   members: [
-    { name: "Vedansh Mathur", role: "Operations Member", photo: "/team/Vedansh.jpeg" },
-    { name: "Mehul Vig",      role: "Technical Lead",    photo: "/team/mehul.jpeg"   },
-    { name: "Manasvi Bansal", role: "Operations Lead",   photo: "/team/manasvi.jpeg" },
+    { name: "Vedansh Mathur", role: "Operations Member", photo: "https://www.glitchbmu.com/team/vedansh-main.png" },
+    { name: "Mehul Vig",      role: "Technical Lead",    photo: "https://www.glitchbmu.com/team/mehul-main.png"   },
+    { name: "Manasvi Bansal", role: "Operations Lead",   photo: "https://www.glitchbmu.com/team/manasvi-main.png" },
   ],
 };
 
