@@ -8,6 +8,7 @@ import { SteeringCrew }      from "@/components/sections/SteeringCrew";
 import { RaceControlFAQ }    from "@/components/sections/RaceControlFAQ";
 import { FinishLineFooter }  from "@/components/sections/FinishLineFooter";
 import { GlobalCarScene }    from "@/components/three/GlobalCarScene";
+import { EventsSection } from "@/components/sections/EventsSection";
 
 /*
   ARCHITECTURE NOTE:
@@ -42,6 +43,10 @@ export default function Home() {
         <SectionDivider label="Sponsors" index={2} />
         {/* Sponsors: opaque → covers car intentionally */}
         <PitLaneSponsors />
+
+        <SectionDivider label="Timeline" index={3} />
+        {/* {Events Section:} */}
+        <EventsSection />
 
         <SectionDivider label="Timeline" index={3} />
         {/* Timeline: semi-transparent → car drifts through */}
